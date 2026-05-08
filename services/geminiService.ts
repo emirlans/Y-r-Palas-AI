@@ -3,15 +3,25 @@ import { DesignConfig, TextToImageConfig, VideoGenerationConfig } from "../types
 
 // Helper to safely get the API Key in both Vite and other environments
 const getApiKey = () => {
+  // Prefer GEMINI_API_KEY as per environment instructions
+  const key = process.env.GEMINI_API_KEY || process.env.API_KEY;
+  if (key) return key;
+
   // @ts-ignore - Vite uses import.meta.env
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     // @ts-ignore
-    return import.meta.env.VITE_API_KEY;
+    return import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
   }
-  return process.env.API_KEY;
+  return null;
 };
 
-const getClient = () => new GoogleGenAI({ apiKey: getApiKey() });
+const getClient = () => {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("Gemini API anahtarı bulunamadı. Lütfen Ayarlar menüsünden GEMINI_API_KEY değişkenini kontrol edin veya .env dosyasına ekleyin.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 const styleMap: Record<string, string> = {
   'Modern': 'Modern',

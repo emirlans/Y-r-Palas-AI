@@ -1,0 +1,8 @@
+{
+  "name": "Yörpalas AI",
+  "description": "Yapay zeka destekli iç mekan tasarım ve dekorasyon uygulaması.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": []
+}

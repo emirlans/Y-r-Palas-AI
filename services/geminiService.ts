@@ -1,12 +1,34 @@
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { DesignConfig, TextToImageConfig, VideoGenerationConfig } from "../types";
 
-// Helper to safely get the API Key for Gemini
+// Helper to safely get the API Key in both Vite and other environments
 const getApiKey = () => {
-  return process.env.GEMINI_API_KEY;
+  let key: string | undefined = undefined;
+
+  try {
+    // This will be statically replaced by Vite due to the define config
+    key = process.env.GEMINI_API_KEY || process.env.API_KEY;
+  } catch (e) {
+    // Ignore ReferenceError if process is undefined and not replaced
+  }
+
+  if (key) return key;
+
+  // @ts-ignore - Vite uses import.meta.env
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // @ts-ignore
+    return import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
+  }
+  return null;
 };
 
-const getClient = () => new GoogleGenAI({ apiKey: getApiKey() });
+const getClient = () => {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("Gemini API anahtarı bulunamadı. Lütfen sayfanın başındaki API anahtarı seçimini tamamlayın veya Ayarlar menüsünden API Key yapılandırmasını kontrol edin.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 const styleMap: Record<string, string> = {
   'Modern': 'Modern',

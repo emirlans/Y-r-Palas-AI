@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { HowItWorks } from './components/HowItWorks';
@@ -8,44 +8,7 @@ import { ChatAssistant } from './components/ChatAssistant';
 import { Check, Zap, Smartphone, Layout } from 'lucide-react';
 
 function App() {
-  const [apiKeyReady, setApiKeyReady] = useState(false);
-  const [needsKey, setNeedsKey] = useState(false);
-
-  useEffect(() => {
-    const checkApiKey = async () => {
-      const aistudio = (window as any).aistudio;
-      if (aistudio && aistudio.hasSelectedApiKey) {
-        try {
-          const hasKey = await aistudio.hasSelectedApiKey();
-          if (hasKey) {
-            setApiKeyReady(true);
-          } else {
-            setNeedsKey(true);
-          }
-        } catch (e) {
-          console.error("Error checking API key:", e);
-          setApiKeyReady(true);
-        }
-      } else {
-        setApiKeyReady(true);
-      }
-    };
-    checkApiKey();
-  }, []);
-
-  const handleSelectKey = async () => {
-    const aistudio = (window as any).aistudio;
-    if (aistudio && aistudio.openSelectKey) {
-      try {
-        await aistudio.openSelectKey();
-        setApiKeyReady(true);
-        setNeedsKey(false);
-      } catch (e) {
-        console.error("Error selecting API key:", e);
-      }
-    }
-  };
-
+  
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const element = document.getElementById(id);
@@ -60,25 +23,6 @@ function App() {
       });
     }
   };
-
-  if (!apiKeyReady && needsKey) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
-            <h2 className="text-2xl font-bold text-navy-900 mb-4">Yörpalas AI'a Hoş Geldiniz</h2>
-            <p className="text-slate-600 mb-6 leading-relaxed">
-              Bu uygulama Veo video oluşturma ve yüksek çözünürlüklü imaj oluşturma yeteneklerini kullanır. Özelliklere erişmek için kendi API anahtarınızı seçmeniz gerekmektedir.
-            </p>
-            <p className="text-sm text-slate-500 mb-8 border-t border-slate-100 pt-4">
-              Ücretlendirme detayları için <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="text-gold-600 hover:underline">faturalandırma dokümantasyonunu</a> inceleyebilirsiniz.
-            </p>
-            <button onClick={handleSelectKey} className="bg-gold-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-gold-700 transition w-full shadow-lg shadow-gold-100">
-              API Anahtarı Seç
-            </button>
-         </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">

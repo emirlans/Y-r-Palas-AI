@@ -1,29 +1,12 @@
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { DesignConfig, TextToImageConfig, VideoGenerationConfig } from "../types";
 
-// Helper to safely get the API Key in both Vite and other environments
+// Helper to safely get the API Key for Gemini
 const getApiKey = () => {
-  // Check if process and process.env exist
-  if (typeof process !== 'undefined' && process.env) {
-    const key = process.env.GEMINI_API_KEY || process.env.API_KEY;
-    if (key) return key;
-  }
-
-  // @ts-ignore - Vite uses import.meta.env
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    // @ts-ignore
-    return import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
-  }
-  return null;
+  return process.env.GEMINI_API_KEY;
 };
 
-const getClient = () => {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("Gemini API anahtarı bulunamadı. Lütfen sayfanın başındaki API anahtarı seçimini tamamlayın veya Ayarlar menüsünden API Key yapılandırmasını kontrol edin.");
-  }
-  return new GoogleGenAI({ apiKey });
-};
+const getClient = () => new GoogleGenAI({ apiKey: getApiKey() });
 
 const styleMap: Record<string, string> = {
   'Modern': 'Modern',

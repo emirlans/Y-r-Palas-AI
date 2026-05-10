@@ -150,9 +150,23 @@ export const DesignTool: React.FC = () => {
           isVeo404 = true;
       }
 
-      // Extract readable message
-      const rawMsg = err?.message || err?.error?.message || (typeof err === 'string' ? err : "Bir hata oluştu.");
-      setError(rawMsg.length < 200 ? rawMsg : "Bir hata oluştu. Lütfen tekrar deneyin.");
+      if (mode === 'video' && isVeo404) {
+          const msg = "Veo özelliği için faturalandırma hesabı tanımlı (Paid Project) bir proje gereklidir. Lütfen açılan pencereden uygun bir proje seçin.";
+          setError(msg);
+          
+          // Trigger AI Studio key selection dialog if available
+          setTimeout(() => {
+            const win = window as any;
+            if (win.aistudio && win.aistudio.openSelectKey) {
+                console.log("Opening Select Key Dialog due to 404...");
+                win.aistudio.openSelectKey();
+            }
+          }, 200);
+      } else {
+          // Extract readable message
+          const rawMsg = err?.message || err?.error?.message || (typeof err === 'string' ? err : "Bir hata oluştu.");
+          setError(rawMsg.length < 200 ? rawMsg : "Bir hata oluştu. Lütfen tekrar deneyin.");
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -336,8 +350,8 @@ export const DesignTool: React.FC = () => {
                      </div>
 
                      <div className="bg-gold-50 p-3 rounded-lg text-gold-800 text-xs border border-gold-100">
-                        <p className="font-semibold flex items-center gap-1 mb-1"><Video size={14}/> Veo AI Video</p>
-                        Yapay zeka ile odanızı canlandırın.
+                        <p className="font-semibold flex items-center gap-1 mb-1"><Video size={14}/> Veo 3.1 Pro</p>
+                        Bu işlem faturalandırma hesabı bağlı bir proje gerektirir.
                      </div>
                  </div>
               )}

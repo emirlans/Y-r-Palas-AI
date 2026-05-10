@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { HowItWorks } from './components/HowItWorks';
@@ -8,6 +8,7 @@ import { ChatAssistant } from './components/ChatAssistant';
 import { Check, Zap, Smartphone, Layout } from 'lucide-react';
 
 function App() {
+  
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const element = document.getElementById(id);

@@ -3,24 +3,15 @@ import { DesignConfig, TextToImageConfig, VideoGenerationConfig } from "../types
 
 // Helper to safely get the API Key in both Vite and other environments
 const getApiKey = () => {
-  if (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) {
-    return process.env.GEMINI_API_KEY;
-  }
   // @ts-ignore - Vite uses import.meta.env
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     // @ts-ignore
-    return import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
+    return import.meta.env.VITE_API_KEY;
   }
-  return null;
+  return process.env.API_KEY;
 };
 
-const getClient = () => {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("Yörpalas AI: Uygulamanın çalışması için bir Gemini API anahtarı gereklidir. Lütfen API anahtarınızın yapılandırıldığından emin olun.");
-  }
-  return new GoogleGenAI({ apiKey });
-};
+const getClient = () => new GoogleGenAI({ apiKey: getApiKey() });
 
 const styleMap: Record<string, string> = {
   'Modern': 'Modern',
@@ -145,9 +136,9 @@ export const generateRoomVideo = async (config: VideoGenerationConfig): Promise<
   const base64Data = config.image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
   try {
-    // Using 'veo-3.1-lite-generate-preview' for broader accessibility
+    // Using 'veo-3.1-generate-preview' for higher quality (Pro level) generation
     let operation = await ai.models.generateVideos({
-      model: 'veo-3.1-lite-generate-preview',
+      model: 'veo-3.1-generate-preview',
       prompt: config.prompt || "Cinematic camera pan of this beautiful room, photorealistic, 4k, slow smooth motion",
       image: {
         imageBytes: base64Data,

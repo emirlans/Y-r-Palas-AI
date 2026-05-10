@@ -54,7 +54,7 @@ export const redesignRoom = async (config: DesignConfig): Promise<string> => {
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-1.5-flash-image',
       contents: {
         parts: [
           { inlineData: { data: base64Data, mimeType: mimeType } },
@@ -75,20 +75,20 @@ export const redesignRoom = async (config: DesignConfig): Promise<string> => {
 
 /**
  * Generates a new room image from text using Imagen 4.
- * If an image is provided, it uses Gemini 2.5 Flash Image for Image+Text generation.
+ * If an image is provided, it uses Gemini 1.5 Flash Image for Image+Text generation.
  */
 export const generateRoomFromText = async (config: TextToImageConfig): Promise<string> => {
   try {
     const ai = getClient();
     
-    // If an image is provided, use Gemini 2.5 Flash Image (Multimodal)
+    // If an image is provided, use Gemini 1.5 Flash Image (Multimodal)
     if (config.image) {
         const mimeMatch = config.image.match(/^data:(image\/[a-zA-Z]+);base64,/);
         const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
         const base64Data = config.image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-image',
+            model: 'gemini-1.5-flash-image',
             contents: {
                 parts: [
                     { inlineData: { data: base64Data, mimeType: mimeType } },
@@ -186,7 +186,7 @@ export const generateRoomVideo = async (config: VideoGenerationConfig): Promise<
 };
 
 /**
- * Chat with the AI Interior Designer using Gemini 3.1 Pro with Tools.
+ * Chat with the AI Interior Designer using gemini-1.5-flash with Tools.
  */
 export const chatWithDesigner = async (
   history: { role: string, parts: { text: string }[] }[],
@@ -195,7 +195,7 @@ export const chatWithDesigner = async (
   const ai = getClient();
   
   const chat = ai.chats.create({
-    model: 'gemini-3.1-pro-preview',
+    model: 'gemini-1.5-flash',
     history: history,
     config: {
       systemInstruction: "Sen 'Yörpalas' uygulamasının uzman yapay zeka iç mimarısın. Kullanıcılara dekorasyon, renk seçimi ve mobilya bulma konularında yardımcı olursun. Google Maps kullanarak mağaza önerileri yapabilir ve Google Search ile trendleri araştırabilirsin. Türkçe konuş.",

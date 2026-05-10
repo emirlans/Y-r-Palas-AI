@@ -1,14 +1,13 @@
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { DesignConfig, TextToImageConfig, VideoGenerationConfig } from "../types";
 
-// Helper to safely get the API Key in both Vite and other environments
+// Helper to safely get the API Key using the platform-provided process.env.GEMINI_API_KEY
 const getApiKey = () => {
-  // @ts-ignore - Vite uses import.meta.env
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    // @ts-ignore
-    return import.meta.env.VITE_API_KEY;
+  const key = process.env.GEMINI_API_KEY || "";
+  if (!key) {
+    console.warn("GEMINI_API_KEY is missing. AI features will not work. Please add it to your environment variables.");
   }
-  return process.env.API_KEY;
+  return key;
 };
 
 const getClient = () => new GoogleGenAI({ apiKey: getApiKey() });
@@ -120,7 +119,7 @@ export const generateRoomFromText = async (config: TextToImageConfig): Promise<s
     return `data:image/jpeg;base64,${base64ImageBytes}`;
 
   } catch (error: any) {
-    console.error("Error generating image:", error);
+    console.error("Generation Error:", error);
     throw error;
   }
 };
@@ -187,7 +186,7 @@ export const generateRoomVideo = async (config: VideoGenerationConfig): Promise<
 };
 
 /**
- * Chat with the AI Interior Designer using Gemini 3 Pro with Tools.
+ * Chat with the AI Interior Designer using Gemini 3.1 Pro with Tools.
  */
 export const chatWithDesigner = async (
   history: { role: string, parts: { text: string }[] }[],
@@ -196,7 +195,7 @@ export const chatWithDesigner = async (
   const ai = getClient();
   
   const chat = ai.chats.create({
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-3.1-pro-preview',
     history: history,
     config: {
       systemInstruction: "Sen 'Yörpalas' uygulamasının uzman yapay zeka iç mimarısın. Kullanıcılara dekorasyon, renk seçimi ve mobilya bulma konularında yardımcı olursun. Google Maps kullanarak mağaza önerileri yapabilir ve Google Search ile trendleri araştırabilirsin. Türkçe konuş.",
@@ -204,7 +203,7 @@ export const chatWithDesigner = async (
         { googleSearch: {} },
         { googleMaps: {} }
       ],
-      thinkingConfig: { thinkingBudget: 1024 } // Enable thinking for reasoning
+      // Automatic thinking is enabled by default for Gemini 3 series
     }
   });
 
@@ -222,7 +221,7 @@ export const chatWithDesigner = async (
 export const transcribeAudio = async (audioBase64: string): Promise<string> => {
   const ai = getClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3-flash-preview',
     contents: {
       parts: [
         { inlineData: { data: audioBase64, mimeType: 'audio/wav' } },

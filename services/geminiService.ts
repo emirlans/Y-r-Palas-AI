@@ -1,13 +1,14 @@
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { DesignConfig, TextToImageConfig, VideoGenerationConfig } from "../types";
 
-// Helper to safely get the API Key using the platform-provided process.env.GEMINI_API_KEY
+// Helper to safely get the API Key in both Vite and other environments
 const getApiKey = () => {
-  const key = process.env.GEMINI_API_KEY || "";
-  if (!key) {
-    console.warn("GEMINI_API_KEY is missing. AI features will not work. Please add it to your environment variables.");
+  // @ts-ignore - Vite uses import.meta.env
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // @ts-ignore
+    return import.meta.env.VITE_API_KEY;
   }
-  return key;
+  return process.env.API_KEY;
 };
 
 const getClient = () => new GoogleGenAI({ apiKey: getApiKey() });
@@ -54,7 +55,7 @@ export const redesignRoom = async (config: DesignConfig): Promise<string> => {
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash-image',
       contents: {
         parts: [
           { inlineData: { data: base64Data, mimeType: mimeType } },
@@ -75,20 +76,20 @@ export const redesignRoom = async (config: DesignConfig): Promise<string> => {
 
 /**
  * Generates a new room image from text using Imagen 4.
- * If an image is provided, it uses Gemini 1.5 Flash Image for Image+Text generation.
+ * If an image is provided, it uses Gemini 2.5 Flash Image for Image+Text generation.
  */
 export const generateRoomFromText = async (config: TextToImageConfig): Promise<string> => {
   try {
     const ai = getClient();
     
-    // If an image is provided, use Gemini 1.5 Flash
+    // If an image is provided, use Gemini 2.5 Flash Image (Multimodal)
     if (config.image) {
         const mimeMatch = config.image.match(/^data:(image\/[a-zA-Z]+);base64,/);
         const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
         const base64Data = config.image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
         const response = await ai.models.generateContent({
-            model: 'gemini-1.5-flash',
+            model: 'gemini-2.5-flash-image',
             contents: {
                 parts: [
                     { inlineData: { data: base64Data, mimeType: mimeType } },
@@ -119,7 +120,7 @@ export const generateRoomFromText = async (config: TextToImageConfig): Promise<s
     return `data:image/jpeg;base64,${base64ImageBytes}`;
 
   } catch (error: any) {
-    console.error("Generation Error:", error);
+    console.error("Error generating image:", error);
     throw error;
   }
 };
@@ -186,7 +187,7 @@ export const generateRoomVideo = async (config: VideoGenerationConfig): Promise<
 };
 
 /**
- * Chat with the AI Interior Designer using gemini-1.5-flash with Tools.
+ * Chat with the AI Interior Designer using Gemini 3 Pro with Tools.
  */
 export const chatWithDesigner = async (
   history: { role: string, parts: { text: string }[] }[],
@@ -195,7 +196,7 @@ export const chatWithDesigner = async (
   const ai = getClient();
   
   const chat = ai.chats.create({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-3-pro-preview',
     history: history,
     config: {
       systemInstruction: "Sen 'Yörpalas' uygulamasının uzman yapay zeka iç mimarısın. Kullanıcılara dekorasyon, renk seçimi ve mobilya bulma konularında yardımcı olursun. Google Maps kullanarak mağaza önerileri yapabilir ve Google Search ile trendleri araştırabilirsin. Türkçe konuş.",
@@ -203,7 +204,7 @@ export const chatWithDesigner = async (
         { googleSearch: {} },
         { googleMaps: {} }
       ],
-      // Automatic thinking is enabled by default for Gemini 3 series
+      thinkingConfig: { thinkingBudget: 1024 } // Enable thinking for reasoning
     }
   });
 
@@ -221,7 +222,7 @@ export const chatWithDesigner = async (
 export const transcribeAudio = async (audioBase64: string): Promise<string> => {
   const ai = getClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     contents: {
       parts: [
         { inlineData: { data: audioBase64, mimeType: 'audio/wav' } },

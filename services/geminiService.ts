@@ -54,7 +54,7 @@ export const redesignRoom = async (config: DesignConfig): Promise<string> => {
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash-image',
+      model: 'gemini-1.5-flash',
       contents: {
         parts: [
           { inlineData: { data: base64Data, mimeType: mimeType } },
@@ -81,14 +81,14 @@ export const generateRoomFromText = async (config: TextToImageConfig): Promise<s
   try {
     const ai = getClient();
     
-    // If an image is provided, use Gemini 1.5 Flash Image (Multimodal)
+    // If an image is provided, use Gemini 1.5 Flash
     if (config.image) {
         const mimeMatch = config.image.match(/^data:(image\/[a-zA-Z]+);base64,/);
         const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
         const base64Data = config.image.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, "");
 
         const response = await ai.models.generateContent({
-            model: 'gemini-1.5-flash-image',
+            model: 'gemini-1.5-flash',
             contents: {
                 parts: [
                     { inlineData: { data: base64Data, mimeType: mimeType } },
@@ -221,7 +221,7 @@ export const chatWithDesigner = async (
 export const transcribeAudio = async (audioBase64: string): Promise<string> => {
   const ai = getClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-1.5-flash',
     contents: {
       parts: [
         { inlineData: { data: audioBase64, mimeType: 'audio/wav' } },

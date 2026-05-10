@@ -1,4 +1,5 @@
 import React from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { HowItWorks } from './components/HowItWorks';
@@ -114,6 +115,7 @@ function App() {
           &copy; {new Date().getFullYear()} Yörpalas. İstanbul'da ❤️ ile yapıldı.
         </div>
       </footer>
+      <Analytics />
     </div>
   );
 }
